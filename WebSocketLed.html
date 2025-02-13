@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP32 WebSocket Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .control-panel {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>ESP32 WebSocket Control Panel</h1>
+
+    <div class="control-panel">
+        <h2>LED Control</h2>
+        <button onclick="toggleLED(true)">ON</button>
+        <button onclick="toggleLED(false)">OFF</button>
+    </div>
+
+    <script>
+        let ws;
+        const serverIP = 'ws://192.168.137.93:81';
+
+        function connect() {
+            ws = new WebSocket(serverIP);
+
+            ws.onopen = function() {
+                console.log('Connected');
+            };
+
+            ws.onclose = function() {
+                console.log('Disconnected - trying to reconnect...');
+                setTimeout(connect, 5000);
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket Error:', error);
+            };
+        }
+
+        function toggleLED(state) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ led: state }));
+            } else {
+                console.log('WebSocket is not connected');
+            }
+        }
+
+        // Initial connection
+        connect();
+    </script>
+</body>
+</html>
